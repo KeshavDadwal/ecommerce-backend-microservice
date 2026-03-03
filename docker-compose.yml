@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  auth-db:
+    image: postgres:16
+    container_name: auth-db
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+      POSTGRES_DB: auth_db
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+
+  auth-migrate:
+    image: migrate/migrate
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    command:
+      [
+        "-path=/migrations",
+        "-database=postgres://auth_user:auth_pass@auth-db:5432/auth_db?sslmode=disable",
+        "up"
+      ]
+    volumes:
+      - ./services/auth-service/migrations:/migrations
+    restart: on-failure
+
+  auth-service:
+    build: ./services/auth-service
+    depends_on:
+      - auth-db
+      - auth-migrate
+    environment:
+      DATABASE_URL: postgres://auth_user:auth_pass@auth-db:5432/auth_db?sslmode=disable
+      PORT: "8080"
+    ports:
+      - "8080:8080"
+
+volumes:
+  auth_db_data:

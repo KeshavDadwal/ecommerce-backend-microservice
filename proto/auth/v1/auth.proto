@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package auth.v1;
+
+option go_package = "github.com/ecommerce-backend-microservice/proto/auth/v1;authv1";
+
+service AuthService {
+  rpc RegisterAdmin (RegisterRequest) returns (AuthResponse);
+  rpc LoginAdmin (LoginRequest) returns (AuthResponse);
+  rpc ValidateToken (ValidateRequest) returns (ValidateResponse);
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string full_name = 3;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+}
+
+message ValidateRequest {
+  string access_token = 1;
+}
+
+message ValidateResponse {
+  string user_id = 1;
+  repeated string roles = 2;
+  repeated string permissions = 3;
+}
