@@ -45,8 +45,8 @@ services:
       DB_MAX_IDLE_CONNS: "10"
       DB_CONN_MAX_LIFETIME_MIN: "30"
       JWT_SECRET: "7fK9xL2pQ4mZ8aT1yN5vR6sD3gH0wB9c"
-      JWT_ACCESS_EXPIRY_MIN: "30"
-      JWT_REFRESH_EXPIRY_MIN: "1440"  # 24 hours
+      JWT_ACCESS_EXPIRY_MINUTES: "30"
+      JWT_REFRESH_EXPIRY_HOURS: "168"   # 7 days
     ports:
       - "8080:8080"
 

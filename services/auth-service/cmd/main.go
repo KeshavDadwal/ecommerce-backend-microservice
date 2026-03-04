@@ -9,6 +9,7 @@ import (
 	authserver "auth-service/internal/server"
 	authv1 "ecommerce-backend-microservice/proto/auth/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -30,6 +31,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	authv1.RegisterAuthServiceServer(grpcServer, authserver.NewAuthServer(db))
+	reflection.Register(grpcServer) // enables grpcurl and other tools to list/call services
 
 	log.Printf("auth-service gRPC listening on %s\n", addr)
 
