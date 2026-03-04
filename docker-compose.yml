@@ -41,6 +41,12 @@ services:
     environment:
       DATABASE_URL: postgres://auth_user:auth_pass@auth-db:5432/auth_db?sslmode=disable
       PORT: "8080"
+      DB_MAX_OPEN_CONNS: "20"
+      DB_MAX_IDLE_CONNS: "10"
+      DB_CONN_MAX_LIFETIME_MIN: "30"
+      JWT_SECRET: "7fK9xL2pQ4mZ8aT1yN5vR6sD3gH0wB9c"
+      JWT_ACCESS_EXPIRY_MIN: "30"
+      JWT_REFRESH_EXPIRY_MIN: "1440"  # 24 hours
     ports:
       - "8080:8080"
 

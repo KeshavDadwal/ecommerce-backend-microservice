@@ -2,8 +2,13 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"net"
 	"os"
+
+	authdb "auth-service/internal/db"
+	authserver "auth-service/internal/server"
+	authv1 "ecommerce-backend-microservice/proto/auth/v1"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -12,14 +17,23 @@ func main() {
 		addr = ":" + port
 	}
 
-	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("ok"))
-	})
+	db, err := authdb.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer db.Close()
 
-	log.Printf("auth-service listening on %s\n", addr)
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatalf("failed to listen on %s: %v", addr, err)
+	}
 
-	if err := http.ListenAndServe(addr, nil); err != nil {
-		log.Fatal(err)
+	grpcServer := grpc.NewServer()
+	authv1.RegisterAuthServiceServer(grpcServer, authserver.NewAuthServer(db))
+
+	log.Printf("auth-service gRPC listening on %s\n", addr)
+
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve gRPC: %v", err)
 	}
 }
