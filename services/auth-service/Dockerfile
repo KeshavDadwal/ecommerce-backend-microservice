@@ -1,16 +1,16 @@
-FROM golang:1.22-alpine AS builder
+# Build from repo root so "replace ecommerce-backend-microservice => ../.." resolves.
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
-# Only go.mod initially to leverage Docker cache
-COPY go.mod ./
-RUN go mod download
-
-# Copy the rest of the source
+# Copy full repo (context must be repo root)
 COPY . .
 
-WORKDIR /app/cmd
-RUN go build -o /auth-service
+WORKDIR /app/services/auth-service
+RUN go mod download
+# Static binary so it runs on Alpine (no glibc/musl mismatch)
+ENV CGO_ENABLED=0
+RUN go build -o /auth-service ./cmd
 
 FROM alpine:3.19
 
